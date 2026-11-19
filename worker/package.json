@@ -1,0 +1,21 @@
+{
+  "name": "worker",
+  "version": "0.1.0",
+  "description": "Cloudflare Worker serving Static Assets and streaming R2 dataset partitions for Fireball Observatory",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "dev": "wrangler dev",
+    "build": "tsc --noEmit",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250214.0",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.5",
+    "wrangler": "^3.111.0"
+  }
+}
