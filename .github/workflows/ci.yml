@@ -7,27 +7,52 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  test-and-build:
+    name: Test and Build
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: data-pipeline
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
-      # Uncomment and adjust the steps below to match your project's setup
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10
 
-      # - name: Install dependencies
-      #   run: npm ci
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
 
-      # - name: Lint
-      #   run: npm run lint
+      - name: Run Rust Pipeline Tests
+        run: cargo test --manifest-path data-pipeline/Cargo.toml
 
-      # - name: Run tests
-      #   run: npm test
+      - name: Test Pipeline on Fixture Dataset
+        run: |
+          mkdir -p target/ci_output
+          cargo run --manifest-path data-pipeline/Cargo.toml -- ingest \
+            --input data/fixtures/sample_meteors.parquet \
+            --output target/ci_output
+          cargo run --manifest-path data-pipeline/Cargo.toml -- verify \
+            --dir target/ci_output
 
-      # - name: Build
-      #   run: npm run build
+      - name: TypeScript Typecheck
+        run: pnpm typecheck
+
+      - name: Run Test Suites
+        run: pnpm test
+
+      - name: Build Web & Worker
+        run: pnpm build

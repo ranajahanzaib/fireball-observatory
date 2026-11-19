@@ -1,46 +1,86 @@
-## Contributing
+# Contributing to Fireball Observatory
 
-We welcome contributions of all kinds to improve this project! Here's how you can get involved:
+Thank you for your interest in contributing to **Fireball Observatory**! We welcome bug fixes, documentation improvements, visualization enhancements, and scientific feature contributions.
 
-1. **Fork the Repository**: Start by forking the repository to your GitHub account.
+---
 
-2. **Clone Your Fork**: Clone the forked repository to your local machine:
+## Code of Conduct
 
-   ```bash
-   git clone <repo_url>
-   cd repo_dir
-   ```
+Please review and adhere to our [Code of Conduct](./CODE_OF_CONDUCT.md). We expect all participants to maintain a welcoming, respectful, and collaborative environment.
 
-3. **Create a Branch**: Create a new branch for your feature or bug fix:
+---
 
-   ```bash
-   git checkout -b feature-name
-   ```
+## Development Setup
 
-4. **Make Changes**: Make your changes to the codebase. Be sure to follow existing code style and conventions.
+### Prerequisites
 
-5. **Commit Changes**: Commit your changes with a clear and descriptive message:
+- [Node.js](https://nodejs.org/) (v20 or v22 LTS)
+- [pnpm](https://pnpm.io/) (v10 or later)
+- [Rust](https://rustup.rs/) (v1.80+ with `cargo`)
 
-   ```bash
-   git commit -m "Add detailed description of the changes"
-   ```
+### 1. Fork & Clone
 
-6. **Push Changes**: Push your changes to your fork:
+```bash
+git clone https://github.com/ranajahanzaib/fireball-observatory.git
+cd fireball-observatory
+pnpm install
+```
 
-   ```bash
-   git push origin feature-name
-   ```
+### 2. Verify Your Environment
 
-7. **Submit a Pull Request**: Open a pull request from your branch to the main repository's branch. Include a detailed description of your changes and the problem they solve.
+Run the verification suites to confirm your setup:
 
-8. **Review and Feedback**: Participate in the review process. Make any requested changes, and your contribution will be merged!
+```bash
+# Typecheck TypeScript across shared, web, and worker packages
+pnpm run typecheck
 
-### Guidelines
+# Run Vitest test suites
+pnpm run test
 
-- Ensure your code follows the existing style and conventions.
-- Include tests for any new functionality or bug fixes.
-- Write clear, concise commit messages and pull request descriptions.
+# Run Rust data pipeline tests
+cargo test --manifest-path data-pipeline/Cargo.toml
+```
 
-### Issues
+### 3. Local Development
 
-Feel free to report bugs or suggest enhancements by creating an issue. Be sure to include detailed information about the problem and, if possible, steps to reproduce it.
+Start the Vite development server:
+
+```bash
+pnpm run dev
+# Opens at http://localhost:5173
+```
+
+By default, the application serves precomputed dataset artifacts directly from `apps/web/public/data/`, allowing you to inspect visualizations, filters, and event profiles offline.
+
+---
+
+## Working with the Data Pipeline
+
+The data pipeline is written in Rust ([data-pipeline/](file:///Users/rj/Code/ranajahanzaib/fireball-observatory/data-pipeline)) using Apache Arrow and Parquet.
+
+### Running with the Fixture Dataset
+
+For fast local testing without downloading the full 294 MB source file, a 10,000-record fixture is provided at `data/fixtures/sample_meteors.parquet`:
+
+```bash
+cargo run --manifest-path data-pipeline/Cargo.toml -- ingest \
+  --input data/fixtures/sample_meteors.parquet \
+  --output target/local_test
+```
+
+### Ingesting the Full Dataset
+
+```bash
+pnpm run data:download
+pnpm run data:build
+pnpm run data:verify
+```
+
+---
+
+## Pull Request Guidelines
+
+1. **Create a branch:** `git checkout -b feature/your-feature-name`
+2. **Write tests:** Add tests in `apps/web/src/test/`, `packages/shared/src/`, or `data-pipeline/tests/` for new features or bug fixes.
+3. **Verify checks:** Ensure `pnpm run typecheck`, `pnpm run test`, and `pnpm run build` all pass cleanly with zero warnings.
+4. **Submit PR:** Open a pull request against `main` with a clear description of changes, motivation, and test steps.
