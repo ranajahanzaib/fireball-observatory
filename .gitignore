@@ -72,3 +72,15 @@ yarn-error.log*
 
 # Python
 venv
+
+# Data pipeline & raw files
+data/raw
+data/processed
+*.parquet
+!data/fixtures/sample_meteors.parquet
+*.json.gz
+.wrangler
+
+PLAN.md
+
+.pnpm-store

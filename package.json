@@ -1,0 +1,26 @@
+{
+  "name": "fireball-observatory-monorepo",
+  "version": "0.1.0",
+  "description": "Visual Meteor Observation Analysis Platform exploring 3.7M+ meteor trajectories from the Global Meteor Network",
+  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ranajahanzaib/fireball-observatory.git"
+  },
+  "scripts": {
+    "dev": "cd apps/web && ./node_modules/.bin/vite",
+    "build": "(cd packages/shared && ./node_modules/.bin/tsc --build) && (cd apps/web && ./node_modules/.bin/tsc && ./node_modules/.bin/vite build) && (cd worker && ./node_modules/.bin/tsc --noEmit)",
+    "test": "(cd packages/shared && sh ../../apps/web/node_modules/.bin/vitest run) && (cd apps/web && ./node_modules/.bin/vitest run) && (cd worker && ./node_modules/.bin/vitest run)",
+    "lint": "./node_modules/.bin/tsc --noEmit -p packages/shared && ./node_modules/.bin/tsc --noEmit -p apps/web && ./node_modules/.bin/tsc --noEmit -p worker",
+    "typecheck": "./node_modules/.bin/tsc --noEmit -p packages/shared && ./node_modules/.bin/tsc --noEmit -p apps/web && ./node_modules/.bin/tsc --noEmit -p worker",
+    "data:download": "bash scripts/download-dataset.sh",
+    "data:build": "bash scripts/build-dataset.sh",
+    "data:verify": "bash scripts/verify-dataset.sh",
+    "data:upload": "bash scripts/upload-to-r2.sh",
+    "deploy": "cd worker && ./node_modules/.bin/wrangler deploy"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}
