@@ -1,0 +1,18 @@
+{
+  "name": "@fireball-observatory/shared",
+  "version": "0.1.0",
+  "description": "Shared astronomical types, IAU shower mappings, and orbital mechanics helpers for Fireball Observatory",
+  "private": true,
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc --build",
+    "typecheck": "tsc --noEmit",
+    "test": "sh ../../apps/web/node_modules/.bin/vitest run"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}
