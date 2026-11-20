@@ -1,6 +1,12 @@
 import { AlertCircle, ArrowLeft } from "lucide-react";
-import React from "react";
-import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
+import React, { useEffect } from "react";
+import {
+  BrowserRouter,
+  Link,
+  Route,
+  Routes,
+  useLocation,
+} from "react-router-dom";
 import { Layout } from "./components/layout/Layout";
 import { AboutPage } from "./routes/AboutPage";
 import { BrightestEventsPage } from "./routes/BrightestEventsPage";
@@ -8,6 +14,14 @@ import { EventDetailPage } from "./routes/EventDetailPage";
 import { ExplorePage } from "./routes/ExplorePage";
 import { OverviewPage } from "./routes/OverviewPage";
 import { ShowerComparisonPage } from "./routes/ShowerComparisonPage";
+
+const ScrollToTop: React.FC = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+};
 
 const NotFoundPage: React.FC = () => (
   <div className="flex flex-col items-center justify-center p-12 text-center my-12">
@@ -32,6 +46,7 @@ const NotFoundPage: React.FC = () => (
 export const App: React.FC = () => {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<OverviewPage />} />

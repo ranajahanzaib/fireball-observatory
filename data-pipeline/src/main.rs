@@ -124,6 +124,7 @@ fn run_ingest(input: &Path, output: &Path, revision: &str, copy_to_web: bool) ->
 
     let mut sporadic_count = 0usize;
     let mut shower_counts: HashMap<String, usize> = HashMap::new();
+    let mut shower_fireball_counts: HashMap<String, usize> = HashMap::new();
     let mut shower_records: HashMap<String, Vec<(f64, f64, f64, f64, i64)>> = HashMap::new(); // mag, vg, h, dur, st
 
     let mut monthly_aggregates: BTreeMap<
@@ -397,6 +398,9 @@ fn run_ingest(input: &Path, output: &Path, revision: &str, copy_to_web: bool) ->
             } else {
                 shower.to_string()
             };
+            if mag <= -4.0 {
+                *shower_fireball_counts.entry(s_key.clone()).or_insert(0) += 1;
+            }
             let s_list = shower_records.entry(s_key).or_insert_with(Vec::new);
             if s_list.len() < 50_000 {
                 // Bound memory while preserving high statistical accuracy
@@ -613,8 +617,11 @@ fn run_ingest(input: &Path, output: &Path, revision: &str, copy_to_web: bool) ->
 
     // Top Showers
     let mut top_showers_list: Vec<TopShowerSummary> = Vec::new();
-    let mut shower_counts_sorted: Vec<(String, usize)> = shower_counts.into_iter().collect();
-    shower_counts_sorted.sort_by(|a, b| b.1.cmp(&a.1));
+    let shower_counts_sorted: Vec<(String, usize)> = {
+        let mut list: Vec<(String, usize)> = shower_counts.clone().into_iter().collect();
+        list.sort_by(|a, b| b.1.cmp(&a.1));
+        list
+    };
 
     for (code, count) in shower_counts_sorted.iter().take(30) {
         if let Some(records) = shower_records.get(code) {
@@ -622,7 +629,7 @@ fn run_ingest(input: &Path, output: &Path, revision: &str, copy_to_web: bool) ->
             let vgs: Vec<f64> = records.iter().map(|r| r.1).collect();
             let hs: Vec<f64> = records.iter().map(|r| r.2).collect();
             let durs: Vec<f64> = records.iter().map(|r| r.3).collect();
-            let fb_c = records.iter().filter(|r| r.0 <= -4.0).count();
+            let fb_c = shower_fireball_counts.get(code).copied().unwrap_or(0);
 
             let m_mag = compute_percentiles(&mags).p50;
             let m_vg = compute_percentiles(&vgs).p50;
@@ -890,14 +897,18 @@ fn run_ingest(input: &Path, output: &Path, revision: &str, copy_to_web: bool) ->
 
     for code in shower_codes_to_compare {
         if let Some(records) = shower_records.get(&code) {
-            let total = records.len();
+            let total = if code == "..." {
+                sporadic_count
+            } else {
+                shower_counts.get(&code).copied().unwrap_or(records.len())
+            };
             let mags: Vec<f64> = records.iter().map(|r| r.0).collect();
             let vgs: Vec<f64> = records.iter().map(|r| r.1).collect();
             let hs: Vec<f64> = records.iter().map(|r| r.2).collect();
             let durs: Vec<f64> = records.iter().map(|r| r.3).collect();
             let sts: Vec<f64> = records.iter().map(|r| r.4 as f64).collect();
 
-            let fb_c = records.iter().filter(|r| r.0 <= -4.0).count();
+            let fb_c = shower_fireball_counts.get(&code).copied().unwrap_or(0);
             let fb_rate = if total > 0 {
                 (fb_c as f64 / total as f64) * 100.0
             } else {
@@ -920,11 +931,16 @@ fn run_ingest(input: &Path, output: &Path, revision: &str, copy_to_web: bool) ->
             for r in records {
                 *st_map.entry(r.4).or_insert(0) += 1;
             }
+            let scale_factor = if !records.is_empty() && total != records.len() {
+                total as f64 / records.len() as f64
+            } else {
+                1.0
+            };
             let st_bins: Vec<StationBin> = st_map
                 .into_iter()
                 .map(|(s, c)| StationBin {
                     stations: s,
-                    count: c,
+                    count: (c as f64 * scale_factor).round() as usize,
                 })
                 .collect();
 
@@ -963,7 +979,7 @@ fn run_ingest(input: &Path, output: &Path, revision: &str, copy_to_web: bool) ->
                             .into_iter()
                             .map(|b| SimpleBin {
                                 bin: b.bin_start,
-                                count: b.count,
+                                count: (b.count as f64 * scale_factor).round() as usize,
                             })
                             .collect(),
                         velocity: vg_hist
@@ -971,7 +987,7 @@ fn run_ingest(input: &Path, output: &Path, revision: &str, copy_to_web: bool) ->
                             .into_iter()
                             .map(|b| SimpleBin {
                                 bin: b.bin_start,
-                                count: b.count,
+                                count: (b.count as f64 * scale_factor).round() as usize,
                             })
                             .collect(),
                         peak_height: h_hist
@@ -979,7 +995,7 @@ fn run_ingest(input: &Path, output: &Path, revision: &str, copy_to_web: bool) ->
                             .into_iter()
                             .map(|b| SimpleBin {
                                 bin: b.bin_start,
-                                count: b.count,
+                                count: (b.count as f64 * scale_factor).round() as usize,
                             })
                             .collect(),
                         duration: dur_hist
@@ -987,7 +1003,7 @@ fn run_ingest(input: &Path, output: &Path, revision: &str, copy_to_web: bool) ->
                             .into_iter()
                             .map(|b| SimpleBin {
                                 bin: b.bin_start,
-                                count: b.count,
+                                count: (b.count as f64 * scale_factor).round() as usize,
                             })
                             .collect(),
                         stations: st_bins,
@@ -1266,9 +1282,14 @@ fn run_ingest(input: &Path, output: &Path, revision: &str, copy_to_web: bool) ->
     println!("Dataset manifest generated successfully at {:?}", p);
 
     if copy_to_web {
-        let web_data_dir = Path::new("../apps/web/public/data");
+        let web_data_dir =
+            if Path::new("apps/web/public/data").exists() || Path::new("apps/web").exists() {
+                PathBuf::from("apps/web/public/data")
+            } else {
+                PathBuf::from("../apps/web/public/data")
+            };
         println!("Copying core analytical artifacts to {:?}...", web_data_dir);
-        fs::create_dir_all(web_data_dir)?;
+        fs::create_dir_all(&web_data_dir)?;
         fs::create_dir_all(web_data_dir.join("distributions"))?;
         fs::create_dir_all(web_data_dir.join("density"))?;
         fs::create_dir_all(web_data_dir.join("catalogs"))?;

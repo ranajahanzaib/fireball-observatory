@@ -94,12 +94,15 @@ export const ShowerComparisonPage: React.FC = () => {
       legend: {
         show: true,
         top: 0,
+        right: "20px",
         textStyle: { color: "#94a3b8", fontSize: 11 },
       },
-      grid: { left: "50px", right: "20px", top: "40px", bottom: "30px" },
+      grid: { left: "55px", right: "30px", top: "50px", bottom: "45px" },
       xAxis: {
         type: "value",
         name: "Velocity (km/s)",
+        nameLocation: "middle",
+        nameGap: 24,
         min: 10,
         max: 75,
         axisLabel: { color: "#94a3b8", fontFamily: "monospace" },
@@ -161,12 +164,15 @@ export const ShowerComparisonPage: React.FC = () => {
       legend: {
         show: true,
         top: 0,
+        right: "20px",
         textStyle: { color: "#94a3b8", fontSize: 11 },
       },
-      grid: { left: "50px", right: "20px", top: "40px", bottom: "30px" },
+      grid: { left: "55px", right: "30px", top: "50px", bottom: "45px" },
       xAxis: {
         type: "value",
         name: "Peak Altitude (km)",
+        nameLocation: "middle",
+        nameGap: 24,
         min: 60,
         max: 130,
         axisLabel: { color: "#94a3b8", fontFamily: "monospace" },

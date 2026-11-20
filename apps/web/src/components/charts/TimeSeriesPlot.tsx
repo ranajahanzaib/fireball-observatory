@@ -79,14 +79,14 @@ export const TimeSeriesPlot: React.FC<TimeSeriesPlotProps> = ({
       legend: {
         show: true,
         top: "0px",
-        right: "20px",
+        left: "center",
         textStyle: { color: "#94a3b8", fontSize: 11 },
       },
       grid: {
         left: "60px",
         right: showFireballs ? "60px" : "25px",
         top: "40px",
-        bottom: "50px",
+        bottom: "60px",
       },
       xAxis: {
         type: "category",
@@ -94,7 +94,11 @@ export const TimeSeriesPlot: React.FC<TimeSeriesPlotProps> = ({
         axisLabel: {
           color: "#94a3b8",
           fontFamily: "monospace",
-          interval: 5,
+          rotate: 35,
+          interval: (_index: number, value: string) => {
+            // Show every ~6 months
+            return value.endsWith("-01") || value.endsWith("-07");
+          },
         },
         axisLine: { lineStyle: { color: "#1e2d4d" } },
         splitLine: { show: false },

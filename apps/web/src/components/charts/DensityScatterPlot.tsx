@@ -25,6 +25,22 @@ interface DensityScatterPlotProps {
   className?: string;
 }
 
+// Logarithmic color ramp for population density heatmap
+function getDensityColor(count: number, maxCount: number): string {
+  if (count <= 0) return "transparent";
+  const norm = Math.min(
+    1,
+    Math.log10(count + 1) / Math.log10(Math.max(maxCount, 100) + 1),
+  );
+  if (norm < 0.15) return "rgba(12, 42, 92, 0.55)";
+  if (norm < 0.35) return "#0369a1";
+  if (norm < 0.55) return "#0284c7";
+  if (norm < 0.7) return "#06b6d4";
+  if (norm < 0.85) return "#fbbf24";
+  if (norm < 0.95) return "#f59e0b";
+  return "#ef4444";
+}
+
 export const DensityScatterPlot: React.FC<DensityScatterPlotProps> = ({
   density,
   samplePoints,
@@ -52,6 +68,12 @@ export const DensityScatterPlot: React.FC<DensityScatterPlotProps> = ({
     return samplePoints.map((p) => ({
       value: [p.v_g_kms, p.peak_height_km, p.peak_abs_magnitude],
       raw: p,
+      itemStyle: {
+        color:
+          p.peak_abs_magnitude <= -4 ? "#fbbf24" : "rgba(56, 189, 248, 0.75)",
+        borderColor: "#ffffff",
+        borderWidth: 0.5,
+      },
     }));
   }, [samplePoints]);
 
@@ -67,25 +89,54 @@ export const DensityScatterPlot: React.FC<DensityScatterPlotProps> = ({
       title: u.title,
       category: u.category,
       reason: u.reason,
+      itemStyle: {
+        color: "#ef4444",
+        borderColor: "#fde047",
+        borderWidth: 1.5,
+      },
     }));
   }, [unusualPoints]);
 
   const option: EChartsOption = useMemo(() => {
     const series: any[] = [];
 
-    // 1. Full population density heatmap
+    // 1. Full population density heatmap via custom rect series
     if (showDensity) {
       series.push({
         name: "Population Density",
-        type: "heatmap",
-        data: heatmapData,
-        progressive: 1000,
-        emphasis: {
-          itemStyle: {
-            borderColor: "#f59e0b",
-            borderWidth: 1,
-          },
+        type: "custom",
+        coordinateSystem: "cartesian2d",
+        xAxisIndex: 0,
+        yAxisIndex: 0,
+        renderItem: (_params: any, api: any) => {
+          const x = api.value(0);
+          const y = api.value(1);
+          const count = api.value(2);
+          const p0 = api.coord([x, y]);
+          const p1 = api.coord([
+            x + density.x_axis.step,
+            y + density.y_axis.step,
+          ]);
+          return {
+            type: "rect",
+            shape: {
+              x: Math.min(p0[0], p1[0]),
+              y: Math.min(p0[1], p1[1]),
+              width: Math.max(2, Math.abs(p1[0] - p0[0])),
+              height: Math.max(2, Math.abs(p1[1] - p0[1])),
+            },
+            style: {
+              fill: getDensityColor(count, density.max_cell_count),
+            },
+          };
         },
+        data: heatmapData,
+        encode: {
+          x: 0,
+          y: 1,
+          tooltip: 2,
+        },
+        z: 1,
       });
     }
 
@@ -94,21 +145,20 @@ export const DensityScatterPlot: React.FC<DensityScatterPlotProps> = ({
       series.push({
         name: "Representative Sample",
         type: "scatter",
+        coordinateSystem: "cartesian2d",
+        xAxisIndex: 0,
+        yAxisIndex: 0,
         data: sampleSeriesData,
+        z: 2,
         symbolSize: (val: any) => {
-          const mag = val[2];
-          if (mag <= -6) return 10;
-          if (mag <= -4) return 7;
+          const mag = Array.isArray(val)
+            ? val[2]
+            : typeof val === "object"
+              ? val?.value?.[2]
+              : 0;
+          if (mag !== undefined && mag <= -6) return 9;
+          if (mag !== undefined && mag <= -4) return 6;
           return 4;
-        },
-        itemStyle: {
-          color: (params: any) => {
-            const raw = params.data.raw as CatalogMeteorItem;
-            if (raw.peak_abs_magnitude <= -4) return "#fbbf24"; // Amber fireball
-            return "rgba(56, 189, 248, 0.7)"; // Cyan meteor
-          },
-          borderWidth: 0.5,
-          borderColor: "#ffffff",
         },
         emphasis: {
           scale: 1.8,
@@ -128,16 +178,13 @@ export const DensityScatterPlot: React.FC<DensityScatterPlotProps> = ({
       series.push({
         name: "Statistical Outliers",
         type: "scatter",
+        coordinateSystem: "cartesian2d",
+        xAxisIndex: 0,
+        yAxisIndex: 0,
         data: unusualSeriesData,
+        z: 3,
         symbol: "diamond",
         symbolSize: 12,
-        itemStyle: {
-          color: "#ef4444",
-          borderColor: "#fde047",
-          borderWidth: 1.5,
-          shadowBlur: 8,
-          shadowColor: "#ef4444",
-        },
         emphasis: {
           scale: 2.0,
           itemStyle: {
@@ -153,6 +200,9 @@ export const DensityScatterPlot: React.FC<DensityScatterPlotProps> = ({
       series.push({
         name: "Selected Observation",
         type: "scatter",
+        coordinateSystem: "cartesian2d",
+        xAxisIndex: 0,
+        yAxisIndex: 0,
         data: [
           {
             value: [selectedEvent.v_g_kms, selectedEvent.peak_height_km],
@@ -168,7 +218,7 @@ export const DensityScatterPlot: React.FC<DensityScatterPlotProps> = ({
           shadowBlur: 15,
           shadowColor: "#f59e0b",
         },
-        zlevel: 10,
+        z: 5,
       });
     }
 
@@ -228,13 +278,13 @@ export const DensityScatterPlot: React.FC<DensityScatterPlotProps> = ({
         left: "70px",
         right: "30px",
         top: "30px",
-        bottom: "60px",
+        bottom: "80px",
       },
       xAxis: {
         type: "value",
         name: "Geocentric Velocity v_g (km/s)",
         nameLocation: "middle",
-        nameGap: 36,
+        nameGap: 30,
         nameTextStyle: { color: "#94a3b8", fontSize: 12, fontWeight: "bold" },
         min: 10,
         max: 75,
@@ -258,36 +308,18 @@ export const DensityScatterPlot: React.FC<DensityScatterPlotProps> = ({
         axisLabel: { color: "#94a3b8", fontFamily: "monospace" },
         axisLine: { lineStyle: { color: "#1e2d4d" } },
       },
-      visualMap: showDensity
-        ? {
-            min: 0,
-            max: Math.min(density.max_cell_count, 15000),
-            calculable: false,
-            show: false,
-            inRange: {
-              color: [
-                "rgba(13, 19, 34, 0.1)",
-                "#0c2a5c",
-                "#0284c7",
-                "#06b6d4",
-                "#fbbf24",
-                "#f59e0b",
-                "#ef4444",
-              ],
-            },
-          }
-        : undefined,
       dataZoom: [
         {
           type: "inside",
           xAxisIndex: 0,
-          yAxisIndex: 0,
+          filterMode: "none",
         },
         {
           type: "slider",
           show: true,
           xAxisIndex: 0,
-          bottom: "10px",
+          filterMode: "none",
+          bottom: "12px",
           height: "18px",
           borderColor: "#1e2d4d",
           backgroundColor: "#0d1322",
@@ -296,6 +328,7 @@ export const DensityScatterPlot: React.FC<DensityScatterPlotProps> = ({
           textStyle: { color: "#94a3b8", fontSize: 10 },
         },
       ],
+      series,
     };
   }, [
     density,

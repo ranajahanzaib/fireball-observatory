@@ -174,7 +174,7 @@ export const AboutPage: React.FC = () => {
             <p className="mt-1">
               Expressed in kilometers above mean sea level. The exact altitude
               where optical luminosity reached its maximum value. Typical
-              cometary dust abletes high in the mesosphere (85–100 km), while
+              cometary dust ablates high in the mesosphere (85-100 km), while
               larger, denser asteroidal stones penetrate deeper into the
               stratosphere (&lt; 60 km).
             </p>

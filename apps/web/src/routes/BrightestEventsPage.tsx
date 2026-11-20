@@ -240,7 +240,7 @@ export const BrightestEventsPage: React.FC = () => {
 
           {/* Brightness Threshold */}
           <div>
-            <label className="block text-[11px] font-medium text-slate-400 mb-1">
+            <label className="block text-[11px] font-medium text-slate-400 mb-1 whitespace-nowrap">
               Brightness Threshold (≤ Mag)
             </label>
             <select
@@ -356,7 +356,7 @@ export const BrightestEventsPage: React.FC = () => {
                     className="hover:bg-space-800/60 cursor-pointer transition-colors group font-mono"
                   >
                     <td className="py-3 px-4 font-bold text-white group-hover:text-fireball-400 transition-colors">
-                      <div className="flex items-center gap-1.5 truncate max-w-[200px]">
+                      <div className="flex items-center gap-1.5 whitespace-nowrap">
                         {event.peak_abs_magnitude <= -8 && (
                           <Flame className="w-3.5 h-3.5 text-fireball-500 shrink-0" />
                         )}

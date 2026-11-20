@@ -15,7 +15,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onOpenSearch }) => {
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
-    `flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+    `flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs lg:text-sm font-medium transition-all whitespace-nowrap ${
       isActive
         ? "bg-space-800 text-fireball-400 border border-fireball-500/30 shadow-sm"
         : "text-slate-300 hover:text-white hover:bg-space-850"
@@ -24,22 +24,22 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch }) => {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-space-800 bg-space-950/80 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between min-h-16 py-2 gap-3">
           {/* Logo & Product Name */}
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-fireball-500 to-amber-700 flex items-center justify-center shadow-lg shadow-fireball-500/20 group-hover:scale-105 transition-transform">
-              <Sparkles className="w-5 h-5 text-white" />
+          <Link to="/" className="flex items-center gap-2.5 group shrink-0">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-gradient-to-br from-fireball-500 to-amber-700 flex items-center justify-center shadow-lg shadow-fireball-500/20 group-hover:scale-105 transition-transform shrink-0">
+              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-bold text-lg tracking-tight text-white group-hover:text-fireball-400 transition-colors">
+                <span className="font-bold text-base sm:text-lg tracking-tight text-white group-hover:text-fireball-400 transition-colors whitespace-nowrap">
                   Fireball Observatory
                 </span>
-                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-space-800 text-fireball-400 border border-space-700">
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-space-800 text-fireball-400 border border-space-700 shrink-0">
                   GMN 3.7M
                 </span>
               </div>
-              <p className="text-xs text-slate-400 hidden sm:block">
+              <p className="text-[11px] text-slate-400 hidden xl:block">
                 Exploring the brightest and most unusual meteor observations
               </p>
             </div>
@@ -47,7 +47,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch }) => {
 
           {/* Navigation Links */}
           <nav
-            className="hidden md:flex items-center gap-1.5"
+            className="hidden lg:flex items-center gap-1 shrink-0"
             aria-label="Main Navigation"
           >
             <NavLink to="/" end className={navLinkClass}>
@@ -90,7 +90,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch }) => {
       </div>
 
       {/* Mobile navigation bar */}
-      <div className="md:hidden flex items-center justify-around py-2 border-t border-space-850 bg-space-950/95 overflow-x-auto">
+      <div className="lg:hidden flex items-center justify-around py-2 px-2 border-t border-space-850 bg-space-950/95 overflow-x-auto">
         <NavLink to="/" end className={navLinkClass}>
           <span>Overview</span>
         </NavLink>

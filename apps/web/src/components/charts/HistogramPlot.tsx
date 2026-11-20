@@ -33,6 +33,7 @@ export const HistogramPlot: React.FC<HistogramPlotProps> = ({
           formatter: `Median: ${distribution.median} ${distribution.unit}`,
           color: "#38bdf8",
           fontSize: 10,
+          position: "insideEndTop",
         },
       },
     ];
@@ -77,7 +78,7 @@ export const HistogramPlot: React.FC<HistogramPlotProps> = ({
       },
       grid: {
         left: "60px",
-        right: "25px",
+        right: "45px",
         top: "30px",
         bottom: "40px",
       },

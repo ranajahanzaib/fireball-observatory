@@ -382,7 +382,7 @@ export const OverviewPage: React.FC = () => {
                     <td className="py-3 px-4 text-fireball-400 font-bold">
                       #{index + 1}
                     </td>
-                    <td className="py-3 px-4 font-bold text-white group-hover:text-fireball-400 transition-colors truncate max-w-[160px]">
+                    <td className="py-3 px-4 font-bold text-white group-hover:text-fireball-400 transition-colors whitespace-nowrap">
                       {event.id}
                     </td>
                     <td className="py-3 px-4 text-slate-300">

@@ -19,6 +19,12 @@ export const EChartBase: React.FC<EChartBaseProps> = ({
 }) => {
   const chartRef = useRef<ReactECharts>(null);
 
+  const mergedStyle: React.CSSProperties = {
+    height: "360px",
+    width: "100%",
+    ...style,
+  };
+
   // Resize handler
   useEffect(() => {
     const handleResize = () => {
@@ -35,7 +41,7 @@ export const EChartBase: React.FC<EChartBaseProps> = ({
       <ReactECharts
         ref={chartRef}
         option={option}
-        style={style}
+        style={mergedStyle}
         theme="dark"
         notMerge={true}
         lazyUpdate={true}
