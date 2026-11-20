@@ -11,11 +11,34 @@
 > **Exploring the brightest and most unusual meteor observations.**
 > An interactive astronomical research and exploration platform analyzing **3,707,142 meteor trajectory solutions** from the [Global Meteor Network (GMN)](https://globalmeteornetwork.org), curated by Julien Simon under Creative Commons Attribution 4.0.
 
+![Fireball Observatory Dashboard](docs/screenshots/overview.png)
+
 ---
 
 ## Observational Overview
 
 **Fireball Observatory** is an open-source astronomical analysis application that brings big-data meteor science into an interactive, high-performance web experience. Rather than treating meteor observations as simple points on a map, Fireball Observatory provides deep analytical access to multi-station stereoscopic camera trajectories, orbital dynamics, atmospheric ablation layers, and population statistics.
+
+---
+
+## Visual Showcase
+
+| Observatory Dashboard & Population Metrics | 2D Velocity vs. Altitude Ablation Heatmap |
+| :---: | :---: |
+| [![Observatory Dashboard](docs/screenshots/overview.png)](docs/screenshots/overview.png) | [![2D Trajectory Explorer](docs/screenshots/velocity-altitude-explorer.png)](docs/screenshots/velocity-altitude-explorer.png) |
+| *Real-time statistics across 3.7M+ events, temporal flux trends, and magnitude distributions.* | *Interactive logarithmic density bins and scatter overlays of cometary vs. asteroidal meteors.* |
+
+| Brightest Fireballs Catalog & Bolide Filtering | Meteor Shower Kinematics & Velocity Comparison |
+| :---: | :---: |
+| [![Brightest Fireballs](docs/screenshots/fireballs-catalog.png)](docs/screenshots/fireballs-catalog.png) | [![Shower Comparison](docs/screenshots/shower-comparison.png)](docs/screenshots/shower-comparison.png) |
+| *Configurable absolute magnitude thresholds ($M_{abs} \le -4.0$), multi-station filters, and sorting.* | *Comparative velocity distributions and ablation profiles across 427 IAU showers and sporadic background.* |
+
+| Individual Event Trajectory & 3D Orbital Elements |
+| :---: |
+| [![Event Detail Inspector](docs/screenshots/event-detail.png)](docs/screenshots/event-detail.png) |
+| *Deep inspection of multi-station triangulation parameters, Keplerian elements ($a, e, i, \omega, \Omega, q$), and population percentile gauges.* |
+
+---
 
 ### Key Capabilities
 
@@ -90,7 +113,7 @@ fireball-observatory/
 │       ├── src/
 │       │   ├── api/             # Typed data fetchers & Web Stream decompressors
 │       │   ├── components/      # UI components (Header, Footer, Layout, StatCards)
-│       │   ├── charts/          # Apache ECharts (Heatmap, Histograms, TimeSeries)
+│       │   │   └── charts/      # Apache ECharts (Heatmap, Histograms, TimeSeries)
 │       │   ├── routes/          # Application pages (Overview, Fireballs, Explore, etc.)
 │       │   └── test/            # React Testing Library & Vitest test suites
 │       └── public/data/         # Local copy of precomputed data artifacts
@@ -161,13 +184,13 @@ pnpm run data:verify
 pnpm run dev
 ```
 
-Visit [http://localhost:5173](http://localhost:5173) in your browser.
+Visit [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
 ## Verification & Testing
 
-Run all unit test suites and typechecks across the monorepo:
+The repository includes end-to-end verification across the Rust pipeline, shared TypeScript domain packages, the Cloudflare edge worker, and the React 19 web application:
 
 ```bash
 # TypeScript typechecking across shared, web, and worker
@@ -181,7 +204,18 @@ cargo test --manifest-path data-pipeline/Cargo.toml
 
 # Production bundle compilation
 pnpm run build
+
+# Cryptographic SHA-256 data artifact verification
+bash scripts/verify-dataset.sh
 ```
+
+### Verified Astronomical Dataset Metrics
+
+When built from the official Global Meteor Network Parquet release (`gmn_meteors.parquet`), the Rust pipeline deterministically validates and generates:
+- **Total Ingested Trajectories:** `3,707,142` stereoscopic observations
+- **Cataloged Fireballs ($M_{abs} \le -4.0$):** `14,484` bolides and superbolides
+- **Documented Meteor Showers:** `427` IAU shower groups + Sporadic background (`2,698,702` meteors, 72.8%)
+- **Precomputed Artifacts:** 1 manifest (`manifest.json`), 6 distribution matrices, 2 catalogs, and 2,058 daily compressed event partitions (`.json.gz`), all cryptographically verified by SHA-256 checksums.
 
 ---
 
